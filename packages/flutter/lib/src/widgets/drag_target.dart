@@ -11,7 +11,8 @@ import 'binding.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-/// Signature for determining whether the given data will be accepted by a [DragTarget].
+/// Signature for determining whether the given data will be accepted by a
+/// [DragTarget].
 ///
 /// Used by [DragTarget.onWillAccept].
 typedef DragTargetWillAccept<T> = bool Function(T data);
@@ -20,6 +21,11 @@ typedef DragTargetWillAccept<T> = bool Function(T data);
 ///
 /// Used by [DragTarget.onAccept].
 typedef DragTargetAccept<T> = void Function(T data);
+
+/// Signature for causing a [DragTarget] to reject the given data.
+///
+/// Used by [DragTarget.onReject].
+typedef DragTargetReject<T> = void Function(T data);
 
 /// Signature for building children of a [DragTarget].
 ///
@@ -31,7 +37,8 @@ typedef DragTargetAccept<T> = void Function(T data);
 /// Used by [DragTarget.builder].
 typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 
-/// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
+/// Signature for when a [Draggable] is dropped without being accepted by a
+/// [DragTarget].
 ///
 /// Used by [Draggable.onDraggableCanceled].
 typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
@@ -480,6 +487,7 @@ class DragTarget<T> extends StatefulWidget {
     @required this.builder,
     this.onWillAccept,
     this.onAccept,
+    this.onReject,
     this.onLeave,
   }) : super(key: key);
 
@@ -500,6 +508,9 @@ class DragTarget<T> extends StatefulWidget {
   /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
 
+  /// Called when an rejected piece of data was dropped over this drag target.
+  final DragTargetReject<T> onReject;
+
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
   final DragTargetLeave<T> onLeave;
@@ -519,14 +530,11 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (avatar.data is T && (widget.onWillAccept == null || widget.onWillAccept(avatar.data))) {
-      setState(() {
-        _candidateAvatars.add(avatar);
-      });
-      return true;
-    }
-    _rejectedAvatars.add(avatar);
-    return false;
+    if (avatar.data is T && (widget.onWillAccept == null || widget.onWillAccept(avatar.data)))
+      setState(() => _candidateAvatars.add(avatar));
+    else
+      setState(() => _rejectedAvatars.add(avatar));
+    return true;
   }
 
   void didLeave(_DragAvatar<dynamic> avatar) {
@@ -542,14 +550,23 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   }
 
   void didDrop(_DragAvatar<dynamic> avatar) {
-    assert(_candidateAvatars.contains(avatar));
+    assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
     if (!mounted)
       return;
+    final bool accepted = _candidateAvatars.contains(avatar);
     setState(() {
       _candidateAvatars.remove(avatar);
+      _rejectedAvatars.remove(avatar);
     });
-    if (widget.onAccept != null)
+    if (accepted && widget.onAccept != null) {
+      print('calling onAccept');
       widget.onAccept(avatar.data);
+      return;
+    }
+    if(!accepted && widget.onReject != null) {
+      print('calling onReject');
+      widget.onReject(avatar.data);
+    }
   }
 
   @override
@@ -659,7 +676,6 @@ class _DragAvatar<T> extends Drag {
       },
       orElse: () => null,
     );
-
     _activeTarget = newTarget;
   }
 
@@ -683,6 +699,8 @@ class _DragAvatar<T> extends Drag {
 
   void finishDrag(_DragEndKind endKind, [ Velocity velocity ]) {
     bool wasAccepted = false;
+    print('endKind: $endKind');
+    print('finishDrag _activeTarget: $_activeTarget');
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget.didDrop(this);
       wasAccepted = true;
