@@ -530,8 +530,9 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (avatar.data is T && (widget.onWillAccept == null || widget.onWillAccept(avatar.data)))
+    if (avatar.data is T && (widget.onWillAccept == null || widget.onWillAccept(avatar.data))) {
       setState(() => _candidateAvatars.add(avatar));
+    }
     else
       setState(() => _rejectedAvatars.add(avatar));
     return true;
@@ -549,24 +550,23 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       widget.onLeave(avatar.data);
   }
 
-  void didDrop(_DragAvatar<dynamic> avatar) {
+  bool didDrop(_DragAvatar<dynamic> avatar) {
     assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
     if (!mounted)
-      return;
+      return false;
     final bool accepted = _candidateAvatars.contains(avatar);
     setState(() {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
-    if (accepted && widget.onAccept != null) {
-      print('calling onAccept');
-      widget.onAccept(avatar.data);
-      return;
+    if (accepted) {
+      if (widget.onAccept != null)
+        widget.onAccept(avatar.data);
+      return true;
     }
-    if(!accepted && widget.onReject != null) {
-      print('calling onReject');
+    if(widget.onReject != null)
       widget.onReject(avatar.data);
-    }
+    return false;
   }
 
   @override
@@ -699,11 +699,8 @@ class _DragAvatar<T> extends Drag {
 
   void finishDrag(_DragEndKind endKind, [ Velocity velocity ]) {
     bool wasAccepted = false;
-    print('endKind: $endKind');
-    print('finishDrag _activeTarget: $_activeTarget');
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
-      _activeTarget.didDrop(this);
-      wasAccepted = true;
+      wasAccepted = _activeTarget.didDrop(this);
       _enteredTargets.remove(_activeTarget);
     }
     _leaveAllEntered();
