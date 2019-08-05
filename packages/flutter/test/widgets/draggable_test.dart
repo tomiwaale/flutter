@@ -1343,9 +1343,11 @@ void main() {
   });
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data twice test', (WidgetTester tester) async {
-    final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
-    final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
+    print('**********');
+    final List<DragTargetData> acceptedDragTargetData = <DragTargetData>[];
+    final List<ExtendedDragTargetData> acceptedExtendedDragTargetData = <ExtendedDragTargetData>[];
     final DragTargetData dragTargetData = DragTargetData();
+
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -1364,7 +1366,8 @@ void main() {
                       child: const Text('Target1'),
                     ),
                   );
-                }, onAccept: acceptedDragTargetDatas.add,
+                },
+                onAccept: acceptedDragTargetData.add,
               ),
               DragTarget<ExtendedDragTargetData>(
                 builder: (BuildContext context, List<ExtendedDragTargetData> data, List<dynamic> rejects) {
@@ -1375,7 +1378,7 @@ void main() {
                     ),
                   );
                 },
-                onAccept: acceptedExtendedDragTargetDatas.add,
+                onAccept: acceptedExtendedDragTargetData.add,
               ),
             ],
           ),
@@ -1394,10 +1397,10 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(acceptedDragTargetDatas, equals(<DragTargetData>[dragTargetData]));
-      expect(acceptedExtendedDragTargetDatas, isEmpty);
+      expect(acceptedDragTargetData, equals(<DragTargetData>[dragTargetData]));
+      expect(acceptedExtendedDragTargetData, isEmpty);
 
-      acceptedDragTargetDatas.clear();
+      acceptedDragTargetData.clear();
       await tester.pump();
     }
   });

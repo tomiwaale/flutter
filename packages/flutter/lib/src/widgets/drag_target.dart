@@ -528,13 +528,16 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   final List<_DragAvatar<dynamic>> _rejectedAvatars = <_DragAvatar<dynamic>>[];
 
   bool didEnter(_DragAvatar<dynamic> avatar) {
+    print('didEnter');
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
     if (avatar.data is T && (widget.onWillAccept == null || widget.onWillAccept(avatar.data))) {
+      print('adding $avatar');
       setState(() => _candidateAvatars.add(avatar));
     }
     else
       setState(() => _rejectedAvatars.add(avatar));
+    print('Returning true');
     return true;
   }
 
@@ -551,19 +554,23 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   }
 
   bool didDrop(_DragAvatar<dynamic> avatar) {
+    print('didDrop');
+    print('candidates: $_candidateAvatars');
+    print('rejects: $_rejectedAvatars');
     assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
     if (!mounted)
       return false;
     final bool accepted = _candidateAvatars.contains(avatar);
-    setState(() {
-      _candidateAvatars.remove(avatar);
-      _rejectedAvatars.remove(avatar);
-    });
+    print('accepted: $accepted');
     if (accepted) {
+      print('removing from candidates');
+      setState(() => _candidateAvatars.remove(avatar));
       if (widget.onAccept != null)
         widget.onAccept(avatar.data);
       return true;
     }
+    print('removing from rejects');
+    setState(() => _rejectedAvatars.remove(avatar));
     if(widget.onReject != null)
       widget.onReject(avatar.data);
     return false;
