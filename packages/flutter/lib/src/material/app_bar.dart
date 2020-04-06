@@ -669,9 +669,10 @@ class _AppBarState extends State<AppBar> {
 }
 
 class _FloatingAppBar extends StatefulWidget {
-  const _FloatingAppBar({ Key key, this.child }) : super(key: key);
+  const _FloatingAppBar({ Key key, this.child, this.externalController}) : super(key: key);
 
   final Widget child;
+  final ScrollController externalController;
 
   @override
   _FloatingAppBarState createState() => _FloatingAppBarState();
@@ -706,7 +707,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   void _isScrollingListener() {
     if (_position == null)
       return;
-
+    print(widget.externalController.position);
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
@@ -747,6 +748,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.snapConfiguration,
     @required this.stretchConfiguration,
     @required this.shape,
+    @required this.externalController,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
@@ -773,6 +775,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool floating;
   final bool pinned;
   final ShapeBorder shape;
+  final ScrollController externalController;
 
   final double _bottomHeight;
 
@@ -836,7 +839,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0) as double),
       ),
     );
-    return floating ? _FloatingAppBar(child: appBar) : appBar;
+    return floating ? _FloatingAppBar(child: appBar, externalController: externalController) : appBar;
   }
 
   @override
@@ -862,7 +865,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
         || snapConfiguration != oldDelegate.snapConfiguration
-        || stretchConfiguration != oldDelegate.stretchConfiguration;
+        || stretchConfiguration != oldDelegate.stretchConfiguration
+        || externalController != oldDelegate.externalController;
   }
 
   @override
@@ -981,6 +985,7 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
+    this.externalController,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1252,6 +1257,9 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
+  /// doc
+  final ScrollController externalController;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1340,6 +1348,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
+          externalController: widget.externalController,
         ),
       ),
     );
