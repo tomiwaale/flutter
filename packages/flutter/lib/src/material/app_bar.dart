@@ -682,21 +682,34 @@ class _FloatingAppBar extends StatefulWidget {
 // stops the floating app bar's snap-into-view or snap-out-of-view animation.
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
+  ScrollPosition _externalPosition;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Handle primary scrolling position.
     if (_position != null)
       _position.isScrollingNotifier.removeListener(_isScrollingListener);
     _position = Scrollable.of(context)?.position;
     if (_position != null)
       _position.isScrollingNotifier.addListener(_isScrollingListener);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Potential external position that we want to inform the float.
+      if (_externalPosition != null)
+        _externalPosition.removeListener(_externalPositionScrollingListener);
+      _externalPosition = widget.externalController.position;
+      if (_externalPosition != null)
+        _externalPosition.addListener(_externalPositionScrollingListener);
+    });
   }
 
   @override
   void dispose() {
     if (_position != null)
       _position.isScrollingNotifier.removeListener(_isScrollingListener);
+    if (_externalPosition != null)
+      _externalPosition.removeListener(_externalPositionScrollingListener);
     super.dispose();
   }
 
@@ -707,7 +720,6 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   void _isScrollingListener() {
     if (_position == null)
       return;
-    print(widget.externalController.position);
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
@@ -715,6 +727,14 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
       header?.maybeStopSnapAnimation(_position.userScrollDirection);
     else
       header?.maybeStartSnapAnimation(_position.userScrollDirection);
+  }
+
+  void _externalPositionScrollingListener() {
+//    print(widget.externalController.position);
+    if (_externalPosition == null)
+      return;
+    final RenderSliverFloatingPersistentHeader header = _headerRenderer();
+    header?.maybeFloatFromExternalPosition(_externalPosition.pixels);
   }
 
   @override

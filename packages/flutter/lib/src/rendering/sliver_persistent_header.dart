@@ -453,6 +453,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   AnimationController _controller;
   Animation<double> _animation;
   double _lastActualScrollOffset;
+  double _currentExternalScrollOffset = 0.0;
+  double _lastExternalScrollOffset = 0.0;
   double _effectiveScrollOffset;
 
   // Distance from our leading edge to the child's leading edge, in the axis
@@ -552,17 +554,31 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     _controller?.stop();
   }
 
+  /// Doc
+  void maybeFloatFromExternalPosition(double offset) {
+    _currentExternalScrollOffset = offset;
+    markNeedsLayout();
+  }
+
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
-    final double maxExtent = this.maxExtent;
+    final double maxExtent = this.maxExtent + _currentExternalScrollOffset;
+//    print(maxExtent);
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset - constraints.scrollOffset;
+      print('_lastActualScrollOffset $_lastActualScrollOffset');
+      print('constraints.scrollOffset ${constraints.scrollOffset}');
+      if (delta == 0.0 && _currentExternalScrollOffset > 0.0)
+        delta = _lastExternalScrollOffset - _currentExternalScrollOffset;
 
-      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward;
+      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward
+        || _currentExternalScrollOffset > 0.0;
+      print(allowFloatingExpansion);
       if (allowFloatingExpansion) {
+//        print('_effectiveScrollOffset $_effectiveScrollOffset');
         if (_effectiveScrollOffset > maxExtent) // We're scrolled off-screen, but should reveal, so
           _effectiveScrollOffset = maxExtent; // pretend we're just at the limit.
       } else {
@@ -573,16 +589,17 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
-    excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset;
-    final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
+    excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset + _currentExternalScrollOffset;
+    final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset + _currentExternalScrollOffset;
 
     layoutChild(
       _effectiveScrollOffset,
-      maxExtent,
+      this.maxExtent,
       overlapsContent: overlapsContent,
     );
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
+    _lastExternalScrollOffset = _currentExternalScrollOffset;
   }
 
   @override
