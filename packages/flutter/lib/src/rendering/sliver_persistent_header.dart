@@ -390,6 +390,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
+    print(geometry);
   }
 
   @override
@@ -453,9 +454,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   AnimationController _controller;
   Animation<double> _animation;
   double _lastActualScrollOffset;
+  double _effectiveScrollOffset;
   double _currentExternalScrollOffset = 0.0;
   double _lastExternalScrollOffset = 0.0;
-  double _effectiveScrollOffset;
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
@@ -515,6 +516,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       maxPaintExtent: maxExtent + stretchOffset,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
+    print(geometry);
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
@@ -560,8 +562,15 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     markNeedsLayout();
   }
 
+  /// Doc
+  void updateExternalPosition(double offset) {
+    _lastExternalScrollOffset = offset;
+    _currentExternalScrollOffset = offset;
+  }
+
   @override
   void performLayout() {
+    print('in layout');
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent + _currentExternalScrollOffset;
 //    print(maxExtent);
@@ -569,14 +578,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset - constraints.scrollOffset;
-      print('_lastActualScrollOffset $_lastActualScrollOffset');
-      print('constraints.scrollOffset ${constraints.scrollOffset}');
+//      print('_lastActualScrollOffset $_lastActualScrollOffset');
+//      print('constraints.scrollOffset ${constraints.scrollOffset}');
       if (delta == 0.0 && _currentExternalScrollOffset > 0.0)
         delta = _lastExternalScrollOffset - _currentExternalScrollOffset;
 
       final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward
         || _currentExternalScrollOffset > 0.0;
-      print(allowFloatingExpansion);
+//      print(allowFloatingExpansion);
       if (allowFloatingExpansion) {
 //        print('_effectiveScrollOffset $_effectiveScrollOffset');
         if (_effectiveScrollOffset > maxExtent) // We're scrolled off-screen, but should reveal, so
@@ -649,6 +658,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       minAllowedExtent,
       constraints.remainingPaintExtent,
     ) as double;
+    print(clampedPaintExtent);
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
@@ -662,6 +672,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
+    print(geometry);
     return 0.0;
   }
 }

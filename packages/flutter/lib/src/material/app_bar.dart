@@ -680,6 +680,8 @@ class _FloatingAppBar extends StatefulWidget {
 
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
 // stops the floating app bar's snap-into-view or snap-out-of-view animation.
+// It also manages any external scroll positions that have ben provided to the
+// [SliverAppBar].
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
   ScrollPosition _externalPosition;
@@ -696,11 +698,10 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Potential external position that we want to inform the float.
-      if (_externalPosition != null)
-        _externalPosition.removeListener(_externalPositionScrollingListener);
       _externalPosition = widget.externalController.position;
-      if (_externalPosition != null)
+      if (_externalPosition != null) {
         _externalPosition.addListener(_externalPositionScrollingListener);
+      }
     });
   }
 
@@ -708,8 +709,6 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   void dispose() {
     if (_position != null)
       _position.isScrollingNotifier.removeListener(_isScrollingListener);
-    if (_externalPosition != null)
-      _externalPosition.removeListener(_externalPositionScrollingListener);
     super.dispose();
   }
 
@@ -727,14 +726,31 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
       header?.maybeStopSnapAnimation(_position.userScrollDirection);
     else
       header?.maybeStartSnapAnimation(_position.userScrollDirection);
+
+    // There may be new a new external position attached to the
+    // externalController that we want to be listening to, e.g. the external
+    // controller has switched to a new tab.
+    if (_externalPosition != widget.externalController.position) {
+      _externalPosition = widget.externalController.position;
+      if (_externalPosition != null) {
+        _externalPosition.addListener(_externalPositionScrollingListener);
+        _updateExternalTracking();
+      }
+    }
   }
 
   void _externalPositionScrollingListener() {
-//    print(widget.externalController.position);
-    if (_externalPosition == null)
+    if (widget.externalController.position == null)
       return;
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-    header?.maybeFloatFromExternalPosition(_externalPosition.pixels);
+    header?.maybeFloatFromExternalPosition(widget.externalController.position.pixels);
+  }
+
+  void _updateExternalTracking() {
+    if (widget.externalController.position == null)
+      return;
+    final RenderSliverFloatingPersistentHeader header = _headerRenderer();
+    header?.updateExternalPosition(widget.externalController.position.pixels);
   }
 
   @override
