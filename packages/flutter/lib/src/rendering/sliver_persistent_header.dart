@@ -155,8 +155,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @protected
   void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
     assert(maxExtent != null);
-    print('scrollOffset $scrollOffset');
-    print('maxExtent $maxExtent');
     final double shrinkOffset = math.min(scrollOffset, maxExtent); // TODO(Piinks): ?
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
       invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
@@ -572,14 +570,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
-    final double maxExtent = this.maxExtent + _currentExternalScrollOffset;
-    
+    final double maxExtent = this.maxExtent;
+    final double scrollOffset = constraints.scrollOffset + _currentExternalScrollOffset;
+
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
-        ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
+        ((scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
-      double delta = _lastActualScrollOffset - constraints.scrollOffset;
-      if (delta == 0.0 && _currentExternalScrollOffset > 0.0)
-        delta = _lastExternalScrollOffset - _currentExternalScrollOffset;
+      double delta = _lastActualScrollOffset - scrollOffset;
 
       final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward
         || _currentExternalScrollOffset > 0.0;
@@ -590,20 +587,20 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         if (delta > 0.0) // If we are trying to expand when allowFloatingExpansion is false,
           delta = 0.0; // disallow the expansion. (But allow shrinking, i.e. delta < 0.0 is fine.)
       }
-      _effectiveScrollOffset = (_effectiveScrollOffset - delta).clamp(0.0, constraints.scrollOffset) as double;
+      _effectiveScrollOffset = (_effectiveScrollOffset - delta).clamp(0.0, scrollOffset) as double;
     } else {
-      _effectiveScrollOffset = constraints.scrollOffset;
+      _effectiveScrollOffset = scrollOffset;
     }
-    excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset + _currentExternalScrollOffset;
-    final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset + _currentExternalScrollOffset;
+    excludeFromSemanticsScrolling = _effectiveScrollOffset <= scrollOffset;
+    final bool overlapsContent = _effectiveScrollOffset < scrollOffset;
 
     layoutChild(
-      _effectiveScrollOffset + _currentExternalScrollOffset,
-      this.maxExtent,
+      _effectiveScrollOffset,
+      maxExtent,
       overlapsContent: overlapsContent,
     );
     _childPosition = updateGeometry();
-    _lastActualScrollOffset = constraints.scrollOffset;
+    _lastActualScrollOffset = scrollOffset;
     _lastExternalScrollOffset = _currentExternalScrollOffset;
   }
 
@@ -649,12 +646,12 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       minExtent :
       constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
-    final double paintExtent = (maxExtent - _currentExternalScrollOffset) - _effectiveScrollOffset;
+    final double paintExtent = maxExtent - _effectiveScrollOffset; //(maxExtent - _currentExternalScrollOffset) - _effectiveScrollOffset;
     final double clampedPaintExtent = paintExtent.clamp(
       minAllowedExtent,
       constraints.remainingPaintExtent,
     ) as double;
-    final double layoutExtent = maxExtent - (constraints.scrollOffset + _currentExternalScrollOffset);
+    final double layoutExtent = maxExtent - constraints.scrollOffset; //maxExtent - (constraints.scrollOffset + _currentExternalScrollOffset);
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;

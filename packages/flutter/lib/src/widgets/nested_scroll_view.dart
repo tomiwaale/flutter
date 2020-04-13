@@ -1444,6 +1444,8 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
   double _scrollExtent;
 
   void _setExtents(double layoutValue, double scrollValue) {
+    print('layoutValue $layoutValue');
+    print('scrollValue $scrollValue');
     assert(
       _writers == 1,
       'Multiple RenderSliverOverlapAbsorbers have been provided the same SliverOverlapAbsorberHandle.',
@@ -1590,6 +1592,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
 
   @override
   void performLayout() {
+    print('performingLayout!');
     assert(
       handle._writers == 1,
       'A SliverOverlapAbsorberHandle cannot be passed to multiple RenderSliverOverlapAbsorber objects at the same time.',
@@ -1600,6 +1603,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
     }
     child.layout(constraints, parentUsesSize: true);
     final SliverGeometry childLayoutGeometry = child.geometry;
+    print('childLayoutGeometry $childLayoutGeometry');
     geometry = SliverGeometry(
       scrollExtent: childLayoutGeometry.scrollExtent - childLayoutGeometry.maxScrollObstructionExtent,
       paintExtent: childLayoutGeometry.paintExtent,
