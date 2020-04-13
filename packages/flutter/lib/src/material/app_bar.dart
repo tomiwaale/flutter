@@ -696,13 +696,15 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     if (_position != null)
       _position.isScrollingNotifier.addListener(_isScrollingListener);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Potential external position that we want to inform the float.
-      _externalPosition = widget.externalController.position;
-      if (_externalPosition != null) {
-        _externalPosition.addListener(_externalPositionScrollingListener);
-      }
-    });
+    // Handle potential external position that we want to inform the float.
+    if (widget.externalController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _externalPosition = widget.externalController.position;
+        if (_externalPosition != null) {
+          _externalPosition.addListener(_externalPositionScrollingListener);
+        }
+      });
+    }
   }
 
   @override
@@ -730,7 +732,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // There may be new a new external position attached to the
     // externalController that we want to be listening to, e.g. the external
     // controller has switched to a new tab.
-    if (_externalPosition != widget.externalController.position) {
+    if (widget.externalController != null && _externalPosition != widget.externalController.position) {
       _externalPosition = widget.externalController.position;
       if (_externalPosition != null) {
         _externalPosition.addListener(_externalPositionScrollingListener);

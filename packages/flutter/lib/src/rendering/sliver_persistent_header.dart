@@ -653,12 +653,11 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       minExtent :
       constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
-    final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double paintExtent = maxExtent - (_effectiveScrollOffset - _currentExternalScrollOffset);
     final double clampedPaintExtent = paintExtent.clamp(
       minAllowedExtent,
       constraints.remainingPaintExtent,
     ) as double;
-    print(clampedPaintExtent);
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
