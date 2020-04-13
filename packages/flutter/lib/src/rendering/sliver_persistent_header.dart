@@ -67,8 +67,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     this.child = child;
   }
 
-  double _lastStretchOffset;
-
   /// The biggest that this render object can become, in the main axis direction.
   ///
   /// This value should not be based on the child. If it changes, call
@@ -102,6 +100,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   bool _needsUpdateChild = true;
   double _lastShrinkOffset = 0.0;
   bool _lastOverlapsContent = false;
+  double _lastStretchOffset;
 
   /// Defines the parameters used to execute an [AsyncCallback] when a
   /// stretching header over-scrolls.
@@ -156,7 +155,9 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @protected
   void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
     assert(maxExtent != null);
-    final double shrinkOffset = math.min(scrollOffset, maxExtent);
+    print('scrollOffset $scrollOffset');
+    print('maxExtent $maxExtent');
+    final double shrinkOffset = math.min(scrollOffset, maxExtent); // TODO(Piinks): ?
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
       invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
         assert(constraints == this.constraints);
@@ -390,7 +391,6 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    print(geometry);
   }
 
   @override
@@ -516,7 +516,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       maxPaintExtent: maxExtent + stretchOffset,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    print(geometry);
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
@@ -556,13 +555,15 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     _controller?.stop();
   }
 
-  /// Doc
+  /// Updates the current external position that the app bar is listening to so
+  /// it may float in or out as needed.
   void maybeFloatFromExternalPosition(double offset) {
     _currentExternalScrollOffset = offset;
     markNeedsLayout();
   }
 
-  /// Doc
+  /// Updates all external positioning, called when the external position has
+  /// changed, e.g. the external controller has switched to a new tab.
   void updateExternalPosition(double offset) {
     _lastExternalScrollOffset = offset;
     _currentExternalScrollOffset = offset;
@@ -570,24 +571,19 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   @override
   void performLayout() {
-    print('in layout');
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent + _currentExternalScrollOffset;
-//    print(maxExtent);
+    
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset - constraints.scrollOffset;
-//      print('_lastActualScrollOffset $_lastActualScrollOffset');
-//      print('constraints.scrollOffset ${constraints.scrollOffset}');
       if (delta == 0.0 && _currentExternalScrollOffset > 0.0)
         delta = _lastExternalScrollOffset - _currentExternalScrollOffset;
 
       final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward
         || _currentExternalScrollOffset > 0.0;
-//      print(allowFloatingExpansion);
       if (allowFloatingExpansion) {
-//        print('_effectiveScrollOffset $_effectiveScrollOffset');
         if (_effectiveScrollOffset > maxExtent) // We're scrolled off-screen, but should reveal, so
           _effectiveScrollOffset = maxExtent; // pretend we're just at the limit.
       } else {
@@ -602,7 +598,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset + _currentExternalScrollOffset;
 
     layoutChild(
-      _effectiveScrollOffset,
+      _effectiveScrollOffset + _currentExternalScrollOffset,
       this.maxExtent,
       overlapsContent: overlapsContent,
     );
@@ -653,12 +649,12 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       minExtent :
       constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
-    final double paintExtent = maxExtent - (_effectiveScrollOffset - _currentExternalScrollOffset);
+    final double paintExtent = (maxExtent - _currentExternalScrollOffset) - _effectiveScrollOffset;
     final double clampedPaintExtent = paintExtent.clamp(
       minAllowedExtent,
       constraints.remainingPaintExtent,
     ) as double;
-    final double layoutExtent = maxExtent - constraints.scrollOffset;
+    final double layoutExtent = maxExtent - (constraints.scrollOffset + _currentExternalScrollOffset);
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;
@@ -671,7 +667,6 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    print(geometry);
     return 0.0;
   }
 }

@@ -680,7 +680,7 @@ class _FloatingAppBar extends StatefulWidget {
 
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
 // stops the floating app bar's snap-into-view or snap-out-of-view animation.
-// It also manages any external scroll positions that have ben provided to the
+// It also manages any external scroll positions that have been provided to the
 // [SliverAppBar].
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
@@ -721,6 +721,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   void _isScrollingListener() {
     if (_position == null)
       return;
+
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
@@ -848,10 +849,13 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0) as double
       : 1.0;
 
+    final double currentExtent = math.max(minExtent, maxExtent - shrinkOffset);
+    print(currentExtent);
+
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
       maxExtent: maxExtent,
-      currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
+      currentExtent: currentExtent,
       toolbarOpacity: toolbarOpacity,
       child: AppBar(
         leading: leading,
@@ -1295,7 +1299,16 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
-  /// doc
+  /// A [ScrollController] unassociated with the current [Scrollable] scope.
+  ///
+  /// Floating [SliverAppBars] will use this external controller to float in and
+  /// out as if the external scrollable were part of the same scope.
+  ///
+  /// See also:
+  ///
+  ///   * [NestedScrollView], A scrolling view inside of which can be nested
+  ///     other scrolling views, with their scroll positions being intrinsically
+  ///     linked.
   final ScrollController externalController;
 
   @override
