@@ -849,13 +849,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0) as double
       : 1.0;
 
-    final double currentExtent = math.max(minExtent, maxExtent - shrinkOffset);
-    print(currentExtent);
-
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
       maxExtent: maxExtent,
-      currentExtent: currentExtent,
+      currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
       toolbarOpacity: toolbarOpacity,
       child: AppBar(
         leading: leading,
