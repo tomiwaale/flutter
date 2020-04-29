@@ -284,6 +284,8 @@ abstract class Target {
 ///    }
 class Environment {
   /// Create a new [Environment] object.
+  ///
+  /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     @required Directory projectDir,
     @required Directory outputDir,
@@ -293,6 +295,7 @@ class Environment {
     @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    @required String engineVersion,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -303,6 +306,10 @@ class Environment {
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
     final StringBuffer buffer = StringBuffer();
+    // The engine revision is `null` for local or custom engines.
+    if (engineVersion != null) {
+      buffer.write(engineVersion);
+    }
     for (final String key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
@@ -326,6 +333,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      engineVersion: engineVersion,
       inputs: inputs,
     );
   }
@@ -333,6 +341,7 @@ class Environment {
   /// Create a new [Environment] object for unit testing.
   ///
   /// Any directories not provided will fallback to a [testDirectory]
+  @visibleForTesting
   factory Environment.test(Directory testDirectory, {
     Directory projectDir,
     Directory outputDir,
@@ -341,6 +350,7 @@ class Environment {
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
+    String engineVersion,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -358,6 +368,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      engineVersion: engineVersion,
     );
   }
 
@@ -373,6 +384,7 @@ class Environment {
     @required this.logger,
     @required this.fileSystem,
     @required this.artifacts,
+    @required this.engineVersion,
     @required this.inputs,
   });
 
@@ -448,6 +460,9 @@ class Environment {
   final Artifacts artifacts;
 
   final FileSystem fileSystem;
+
+  /// The version of the current engine, or `null` if built with a local engine.
+  final String engineVersion;
 }
 
 /// The result information from the build system.
@@ -651,7 +666,7 @@ class _BuildInstance {
   Future<bool> _invokeInternal(Node node) async {
     final PoolResource resource = await resourcePool.request();
     final Stopwatch stopwatch = Stopwatch()..start();
-    bool passed = true;
+    bool succeeded = true;
     bool skipped = false;
 
     // The build system produces a list of aggregate input and output
@@ -687,7 +702,7 @@ class _BuildInstance {
         skipped = true;
         logger.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
-        return passed;
+        return succeeded;
       }
       logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
@@ -726,7 +741,7 @@ class _BuildInstance {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
       // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
-      passed = false;
+      succeeded = false;
       skipped = false;
       exceptionMeasurements[node.target.name] = ExceptionMeasurement(
           node.target.name, exception, stackTrace);
@@ -737,11 +752,11 @@ class _BuildInstance {
         target: node.target.name,
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
-        passed: passed,
+        succeeded: succeeded,
         analyicsName: node.target.analyticsName,
       );
     }
-    return passed;
+    return succeeded;
   }
 }
 
@@ -766,14 +781,14 @@ class PerformanceMeasurement {
     @required this.target,
     @required this.elapsedMilliseconds,
     @required this.skipped,
-    @required this.passed,
+    @required this.succeeded,
     @required this.analyicsName,
   });
 
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
-  final bool passed;
+  final bool succeeded;
   final String analyicsName;
 }
 

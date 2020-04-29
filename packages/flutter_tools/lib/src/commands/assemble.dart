@@ -17,6 +17,7 @@ import '../build_system/targets/macos.dart';
 import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -24,25 +25,29 @@ import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackWindows(),
+  // Shared targets
   CopyAssets(),
   KernelSnapshot(),
   AotElfProfile(),
   AotElfRelease(),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
+  // macOS targets
   DebugMacOSFramework(),
   DebugMacOSBundleFlutterAssets(),
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
+  // Linux targets
   DebugBundleLinuxAssets(),
+  // Web targets
   WebServiceWorker(),
-  DebugAndroidApplication(),
-  FastStartAndroidApplication(),
-  ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   CopyFlutterBundle(),
+  // Android targets,
+  DebugAndroidApplication(),
+  FastStartAndroidApplication(),
+  ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
   androidArm64ProfileBundle,
@@ -50,9 +55,13 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  // iOS targets
   DebugIosApplicationBundle(),
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
+  // Windows targets
+  UnpackWindows(),
+  DebugBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -63,6 +72,10 @@ class AssembleCommand extends FlutterCommand {
       'define',
       abbr: 'd',
       help: 'Allows passing configuration to a target with --define=target=key=value.',
+    );
+    argParser.addOption(
+      'performance-measurement-file',
+      help: 'Output individual target performance to a JSON file.'
     );
     argParser.addMultiOption(
       'input',
@@ -87,6 +100,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(kDartDefines);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -163,6 +177,9 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      engineVersion: globals.artifacts.isLocalEngine
+        ? null
+        : globals.flutterVersion.engineRevision
     );
     return result;
   }
@@ -181,6 +198,10 @@ class AssembleCommand extends FlutterCommand {
     // Workaround for extraGenSnapshot formatting.
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
+    }
+    // Workaround for dart-define formatting
+    if (argResults.wasParsed(kDartDefines)) {
+      results[kDartDefines] = argResults[kDartDefines] as String;
     }
     return results;
   }
@@ -215,13 +236,16 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed('build-outputs')) {
       writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
     }
+    if (argResults.wasParsed('performance-measurement-file')) {
+      final File outFile = globals.fs.file(argResults['performance-measurement-file']);
+      writePerformanceData(result.performance.values, outFile);
+    }
     if (argResults.wasParsed('depfile')) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: globals.platform,
       );
       depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
@@ -245,6 +269,26 @@ void writeListIfChanged(List<File> files, String path) {
   if (currentContents != newContents) {
     file.writeAsStringSync(newContents);
   }
+}
+
+/// Output performance measurement data in [outFile].
+@visibleForTesting
+void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File outFile) {
+  final Map<String, Object> jsonData = <String, Object>{
+    'targets': <Object>[
+      for (final PerformanceMeasurement measurement in measurements)
+        <String, Object>{
+          'name': measurement.analyicsName,
+          'skipped': measurement.skipped,
+          'succeeded': measurement.succeeded,
+          'elapsedMilliseconds': measurement.elapsedMilliseconds,
+        }
+    ]
+  };
+  if (!outFile.parent.existsSync()) {
+    outFile.parent.createSync(recursive: true);
+  }
+  outFile.writeAsStringSync(json.encode(jsonData));
 }
 
 class _CompositeTarget extends Target {
