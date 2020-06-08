@@ -2199,6 +2199,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeRight: removeRightPadding,
       removeBottom: removeBottomPadding,
     );
+    if (childId == _ScaffoldSlot.floatingActionButton)
+      print('DATA BEFORE: $data');
     if (removeBottomInset)
       data = data.removeViewInsets(removeBottom: true);
 
@@ -2207,6 +2209,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         padding: data.padding.copyWith(bottom: data.viewPadding.bottom)
       );
     }
+    if (childId == _ScaffoldSlot.floatingActionButton)
+      print('DATA AFTER: $data');
 
     if (child != null) {
       children.add(
@@ -2459,6 +2463,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       FloatingActionButtonLocation.miniCenterFloat,
     ];
 
+    print('FAB: ${MediaQuery.of(context)}, '
+      'removing bottom? ${!_maintainBottomPadding.contains(widget.floatingActionButtonLocation)} '
+      'location: ${widget.floatingActionButtonLocation}');
     _addIfNonNull(
       children,
       _FloatingActionButtonTransition(
@@ -2469,10 +2476,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         currentController: _floatingActionButtonVisibilityController,
       ),
       _ScaffoldSlot.floatingActionButton,
-      removeLeftPadding: _maintainLeftPadding.contains(widget.floatingActionButtonLocation),
+      removeLeftPadding: !_maintainLeftPadding.contains(widget.floatingActionButtonLocation),
       removeTopPadding: true,
-      removeRightPadding: _maintainRightPadding.contains(widget.floatingActionButtonLocation),
-      removeBottomPadding: _maintainBottomPadding.contains(widget.floatingActionButtonLocation),
+      removeRightPadding: !_maintainRightPadding.contains(widget.floatingActionButtonLocation),
+      removeBottomPadding: !_maintainBottomPadding.contains(widget.floatingActionButtonLocation),
     );
 
     switch (themeData.platform) {
