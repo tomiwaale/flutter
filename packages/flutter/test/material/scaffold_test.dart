@@ -2021,7 +2021,7 @@ void main() {
     });
   });
   group('FloatingActionButtonLocations and SafeArea', () {
-    Widget _buildTest(FloatingActionButtonLocation location, { bool mini }) {
+    Widget _buildTest(FloatingActionButtonLocation location, Key key, { bool mini }) {
       return MaterialApp(home: MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(50.0)),
         child: Scaffold(
@@ -2029,6 +2029,7 @@ void main() {
           body: SafeArea(child: Container()),
           floatingActionButtonLocation: location,
           floatingActionButton: FloatingActionButton(
+            key: key,
             mini: mini,
             onPressed: () {},
             child: const Placeholder(),
@@ -2038,8 +2039,9 @@ void main() {
       );
     }
     testWidgets('Floating locations follow SafeArea', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.startFloat, mini: false));
-
+      final Key floatingActionButton = UniqueKey();
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.startFloat, floatingActionButton, mini: false));
+      expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
 
       await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniStartFloat, mini: true));
 
