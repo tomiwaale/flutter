@@ -2442,6 +2442,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
+    // [FloatingActionButtonLocation]s that should adhere to the provided
+    // padding.
+    final List<FloatingActionButtonLocation> _maintainLeftPadding = <FloatingActionButtonLocation>[
+      FloatingActionButtonLocation.startFloat,
+      FloatingActionButtonLocation.miniStartFloat,
+    ];
+    final List<FloatingActionButtonLocation> _maintainRightPadding = <FloatingActionButtonLocation>[
+      FloatingActionButtonLocation.endFloat,
+      FloatingActionButtonLocation.miniEndFloat,
+    ];
+    final List<FloatingActionButtonLocation> _maintainBottomPadding = <FloatingActionButtonLocation>[
+      ..._maintainLeftPadding,
+      ..._maintainRightPadding,
+      FloatingActionButtonLocation.centerFloat,
+      FloatingActionButtonLocation.miniCenterFloat,
+    ];
+
     _addIfNonNull(
       children,
       _FloatingActionButtonTransition(
@@ -2452,10 +2469,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         currentController: _floatingActionButtonVisibilityController,
       ),
       _ScaffoldSlot.floatingActionButton,
-      removeLeftPadding: true,
+      removeLeftPadding: _maintainLeftPadding.contains(widget.floatingActionButtonLocation),
       removeTopPadding: true,
-      removeRightPadding: true,
-      removeBottomPadding: true,
+      removeRightPadding: _maintainRightPadding.contains(widget.floatingActionButtonLocation),
+      removeBottomPadding: _maintainBottomPadding.contains(widget.floatingActionButtonLocation),
     );
 
     switch (themeData.platform) {
