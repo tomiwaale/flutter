@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'media_query.dart';
 
 class _PlaceholderPainter extends CustomPainter {
   const _PlaceholderPainter({
@@ -86,7 +85,6 @@ class Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Placeholder mediaQuery: ${MediaQuery.of(context)}');
     return LimitedBox(
       maxWidth: fallbackWidth,
       maxHeight: fallbackHeight,
