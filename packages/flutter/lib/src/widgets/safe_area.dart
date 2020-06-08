@@ -99,7 +99,6 @@ class SafeArea extends StatelessWidget {
     // Bottom padding has been consumed - i.e. by the keyboard
     if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
       padding = padding.copyWith(bottom: data.viewPadding.bottom);
-
     return Padding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),
