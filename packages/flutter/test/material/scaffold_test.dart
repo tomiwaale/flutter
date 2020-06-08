@@ -2024,6 +2024,40 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+  group('FloatingActionButtonLocations and SafeArea', () {
+    Widget _buildTest(FloatingActionButtonLocation location, { bool mini }) {
+      return MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.all(50.0)),
+        child: Scaffold(
+          appBar: AppBar(),
+          body: SafeArea(child: Container()),
+          floatingActionButtonLocation: location,
+          floatingActionButton: FloatingActionButton(
+            mini: mini,
+            onPressed: () {},
+            child: const Placeholder(),
+          ),
+        )
+      );
+    }
+    testWidgets('Floating locations follow SafeArea', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.startFloat, mini: false));
+
+
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniStartFloat, mini: true));
+
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.centerFloat, mini: false));
+
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniCenterFloat, mini: true));
+
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.endFloat, mini: false));
+
+      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniEndFloat, mini: true));
+    });
+    testWidgets('Non-Floating locations do not follow SafeArea', (WidgetTester tester) async {
+      await tester.pumpWidget(_buildTest());
+    });
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
