@@ -2020,8 +2020,13 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
-  group('FloatingActionButtonLocations and SafeArea', () {
-    Widget _buildTest(FloatingActionButtonLocation location, Key key, { bool mini }) {
+
+  group('Applies padding based on FloatingActionButtonLocations', () {
+    Widget _buildTest(
+      FloatingActionButtonLocation location,
+      Key key, {
+      bool mini = false,
+    }) {
       return MaterialApp(home: MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(50.0)),
         child: Scaffold(
@@ -2038,23 +2043,196 @@ void main() {
       )
       );
     }
-    testWidgets('Floating locations follow SafeArea', (WidgetTester tester) async {
-      final Key floatingActionButton = UniqueKey();
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.startFloat, floatingActionButton, mini: false));
-      expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
 
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniStartFloat, mini: true));
+    group('receives padding', () {
+      testWidgets('startFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.startFloat,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)),
+        );
+      });
 
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.centerFloat, mini: false));
+      testWidgets('miniStartFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniStartFloat,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 536.0, 114.0, 584.0)),
+        );
+      });
 
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniCenterFloat, mini: true));
+      testWidgets('centerFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.centerFloat,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)),
+        );
+      });
 
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.endFloat, mini: false));
+      testWidgets('miniCenterFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniCenterFloat,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 536.0, 114.0, 584.0)),
+        );
+      });
 
-      await tester.pumpWidget(_buildTest(FloatingActionButtonLocation.miniEndFloat, mini: true));
+      testWidgets('endFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.endFloat,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)),
+        );
+      });
+
+      testWidgets('miniEndFloat', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniEndFloat,
+          floatingActionButton,
+          mini: true,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 536.0, 114.0, 584.0)),
+        );
+      });
     });
-    testWidgets('Non-Floating locations do not follow SafeArea', (WidgetTester tester) async {
-      //await tester.pumpWidget(_buildTest());
+
+    group('Does not receive padding', () {
+      testWidgets('startTop', (WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.startTop,
+          floatingActionButton,
+        ));
+        expect(
+          tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 78.0, 122.0, 134.0)),
+        );
+      });
+
+      testWidgets('miniStartTop', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniStartTop, floatingActionButton,
+          mini: true));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 82.0, 114.0, 130.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.centerTop, floatingActionButton,
+          mini: false));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniCenterTop, floatingActionButton,
+          mini: true));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.endTop, floatingActionButton,
+          mini: false));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniEndTop, floatingActionButton,
+          mini: true));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.startDocked, floatingActionButton,
+          mini: false));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniStartDocked, floatingActionButton,
+          mini: true));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.centerDocked, floatingActionButton,
+          mini: false));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniCenterDocked, floatingActionButton,
+          mini: true));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.endDocked, floatingActionButton,
+          mini: false));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
+      testWidgets('Non-Floating locations do not recive padding', (
+        WidgetTester tester) async {
+        final Key floatingActionButton = UniqueKey();
+        await tester.pumpWidget(_buildTest(
+          FloatingActionButtonLocation.miniEndDocked, floatingActionButton,
+          mini: true));
+        expect(tester.getRect(find.byKey(floatingActionButton)),
+          rectMoreOrLessEquals(const Rect.fromLTRB(66.0, 528.0, 122.0, 584.0)));
+      });
     });
   });
 }
