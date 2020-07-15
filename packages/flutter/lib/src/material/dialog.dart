@@ -5,7 +5,6 @@
 // @dart = 2.8
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -311,10 +310,7 @@ class AlertDialog extends StatelessWidget {
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
   ///
-  /// Typically this is a list of [FlatButton] widgets. It is recommended to
-  /// set the [textAlign] to [TextAlign.end] for the [Text] within the
-  /// [FlatButton], so that buttons whose labels wrap to an extra line align
-  /// with the overall [ButtonBar]'s alignment within the dialog.
+  /// Typically this is a list of [FlatButton] widgets.
   ///
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
   /// of padding on each side.
@@ -470,24 +466,12 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
-    // The paddingScaleFactor is used to adjust the padding of Dialog's
-    // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
-    final TextDirection textDirection = Directionality.of(context);
-
     Widget titleWidget;
     Widget contentWidget;
     Widget actionsWidget;
-    if (title != null) {
-      final EdgeInsets defaultTitlePadding = EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
-      final EdgeInsets effectiveTitlePadding = titlePadding?.resolve(textDirection) ?? defaultTitlePadding;
-      titleWidget = Padding(
-        padding: EdgeInsets.only(
-          left: effectiveTitlePadding.left * paddingScaleFactor,
-          right: effectiveTitlePadding.right * paddingScaleFactor,
-          top: effectiveTitlePadding.top * paddingScaleFactor,
-          bottom: effectiveTitlePadding.bottom,
-        ),
+    if (title != null)
+     titleWidget = Padding(
+        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
@@ -497,26 +481,17 @@ class AlertDialog extends StatelessWidget {
           ),
         ),
       );
-    }
 
-    if (content != null) {
-      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
+    if (content != null)
       contentWidget = Padding(
-        padding: EdgeInsets.only(
-          left: effectiveContentPadding.left * paddingScaleFactor,
-          right: effectiveContentPadding.right * paddingScaleFactor,
-          top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
-          bottom: effectiveContentPadding.bottom,
-        ),
+        padding: contentPadding,
         child: DefaultTextStyle(
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content,
         ),
       );
-    }
 
-
-    if (actions != null) {
+    if (actions != null)
       actionsWidget = Padding(
         padding: actionsPadding,
         child: ButtonBar(
@@ -526,7 +501,6 @@ class AlertDialog extends StatelessWidget {
           children: actions,
         ),
       );
-    }
 
     List<Widget> columnChildren;
     if (scrollable) {
@@ -831,44 +805,6 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
-    // The paddingScaleFactor is used to adjust the padding of Dialog
-    // children.
-    final double paddingScaleFactor = _paddingScaleFactor(MediaQuery.of(context).textScaleFactor);
-    final TextDirection textDirection = Directionality.of(context);
-
-    Widget titleWidget;
-    if (title != null) {
-      final EdgeInsets effectiveTitlePadding = titlePadding.resolve(textDirection);
-      titleWidget = Padding(
-        padding: EdgeInsets.only(
-          left: effectiveTitlePadding.left * paddingScaleFactor,
-          right: effectiveTitlePadding.right * paddingScaleFactor,
-          top: effectiveTitlePadding.top * paddingScaleFactor,
-          bottom: children == null ? effectiveTitlePadding.bottom * paddingScaleFactor : effectiveTitlePadding.bottom,
-        ),
-        child: DefaultTextStyle(
-          style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
-          child: Semantics(namesRoute: true, child: title),
-        ),
-      );
-    }
-
-    Widget contentWidget;
-    if (children != null) {
-      final EdgeInsets effectiveContentPadding = contentPadding.resolve(textDirection);
-      contentWidget = Flexible(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: effectiveContentPadding.left * paddingScaleFactor,
-            right: effectiveContentPadding.right * paddingScaleFactor,
-            top: title == null ? effectiveContentPadding.top * paddingScaleFactor : effectiveContentPadding.top,
-            bottom: effectiveContentPadding.bottom * paddingScaleFactor,
-          ),
-          child: ListBody(children: children),
-        ),
-      );
-    }
-
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
@@ -878,9 +814,20 @@ class SimpleDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (title != null)
-              titleWidget,
+              Padding(
+                padding: titlePadding,
+                child: DefaultTextStyle(
+                  style: titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.headline6,
+                  child: Semantics(namesRoute: true, child: title),
+                ),
+              ),
             if (children != null)
-              contentWidget,
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: contentPadding,
+                  child: ListBody(children: children),
+                ),
+              ),
           ],
         ),
       ),
@@ -1011,11 +958,4 @@ Future<T> showDialog<T>({
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
   );
-}
-
-double _paddingScaleFactor(double textScaleFactor) {
-  final double clampedTextScaleFactor = textScaleFactor.clamp(1.0, 2.0).toDouble();
-  // The final padding scale factor is clamped between 1/3 and 1. For example,
-  // a non-scaled padding of 24 will produce a padding between 24 and 8.
-  return lerpDouble(1.0, 1.0 / 3.0, clampedTextScaleFactor - 1.0);
 }

@@ -210,9 +210,7 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   final ByteData invertedMasterRgba = _invert(masterImageRgba);
   final ByteData invertedTestRgba = _invert(testImageRgba);
 
-  final Uint8List testImageBytes = (await testImage.toByteData()).buffer.asUint8List();
-  final ByteData maskedDiffRgba = ByteData(testImageBytes.length);
-  maskedDiffRgba.buffer.asUint8List().setRange(0, testImageBytes.length, testImageBytes);
+  final ByteData maskedDiffRgba = await testImage.toByteData();
   final ByteData isolatedDiffRgba = ByteData(width * height * 4);
 
   for (int x = 0; x < width; x++) {

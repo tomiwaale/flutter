@@ -34,8 +34,8 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether fast single widget reloads are enabled.
-  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
+  /// Whether the Android embedding V2 is enabled.
+  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -68,7 +68,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  singleWidgetReload,
+  flutterAndroidEmbeddingV2Feature,
 ];
 
 /// The [Feature] for flutter web.
@@ -131,25 +131,26 @@ const Feature flutterWindowsDesktopFeature = Feature(
   ),
 );
 
-/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
-const Feature singleWidgetReload = Feature(
-  name: 'Hot reload optimization for changes to class body of a single widget',
-  configSetting: 'single-widget-reload-optimization',
-  master: FeatureChannelSetting(
+/// The [Feature] for generating projects using the new Android embedding.
+const Feature flutterAndroidEmbeddingV2Feature = Feature(
+  name: 'flutter create generates projects using the Android embedding V2',
+  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
+  configSetting: 'enable-android-embedding-v2',
+  beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   dev: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
-  beta: FeatureChannelSetting(
+  master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
   stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
+    enabledByDefault: true,
   ),
 );
 

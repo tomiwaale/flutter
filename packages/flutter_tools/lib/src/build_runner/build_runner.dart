@@ -104,7 +104,6 @@ class BuildRunner extends CodeGenerator {
         directory: generatedDirectory.path,
         upgrade: false,
         checkLastModified: false,
-        generateSyntheticPackage: false,
       );
       if (!scriptIdFile.existsSync()) {
         scriptIdFile.createSync(recursive: true);

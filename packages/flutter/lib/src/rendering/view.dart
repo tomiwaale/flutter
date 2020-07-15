@@ -4,7 +4,6 @@
 
 // @dart = 2.8
 
-import 'dart:collection' show LinkedHashMap;
 import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
@@ -199,7 +198,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   ///  * [Layer.findAllAnnotations], which is used by this method to find all
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> hitTestMouseTrackers(Offset position) {
+  Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
@@ -207,11 +206,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (child != null)
       child.hitTest(result, position: position);
     result.add(HitTestEntry(this));
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{}
-        as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+    final List<MouseTrackerAnnotation> annotations = <MouseTrackerAnnotation>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target is MouseTrackerAnnotation) {
-        annotations[entry.target as MouseTrackerAnnotation] = entry.transform;
+        annotations.add(entry.target as MouseTrackerAnnotation);
       }
     }
     return annotations;

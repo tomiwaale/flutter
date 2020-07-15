@@ -27,7 +27,6 @@ import '../reporting/reporting.dart';
 
 const int kXcodeRequiredVersionMajor = 11;
 const int kXcodeRequiredVersionMinor = 0;
-const int kXcodeRequiredVersionPatch = 0;
 
 enum SdkType {
   iPhone,
@@ -98,8 +97,8 @@ class Xcode {
   }
 
   int get majorVersion => _xcodeProjectInterpreter.majorVersion;
+
   int get minorVersion => _xcodeProjectInterpreter.minorVersion;
-  int get patchVersion => _xcodeProjectInterpreter.patchVersion;
 
   String get versionText => _xcodeProjectInterpreter.versionText;
 
@@ -152,9 +151,6 @@ class Xcode {
       return true;
     }
     if (majorVersion == kXcodeRequiredVersionMajor) {
-      if (minorVersion == kXcodeRequiredVersionMinor) {
-        return patchVersion >= kXcodeRequiredVersionPatch;
-      }
       return minorVersion >= kXcodeRequiredVersionMinor;
     }
     return false;

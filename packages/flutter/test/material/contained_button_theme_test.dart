@@ -9,14 +9,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Passing no ElevatedButtonTheme returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no ContainedButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
           body: Center(
-            child: ElevatedButton(
+            child: ContainedButton(
               onPressed: () { },
               child: const Text('button'),
             ),
@@ -26,7 +26,7 @@ void main() {
     );
 
     final Finder buttonMaterial = find.descendant(
-      of: find.byType(ElevatedButton),
+      of: find.byType(ContainedButton),
       matching: find.byType(Material),
     );
 
@@ -43,7 +43,7 @@ void main() {
     expect(material.textStyle.fontWeight, FontWeight.w500);
   });
 
-  group('[Theme, TextTheme, ElevatedButton style overrides]', () {
+  group('[Theme, TextTheme, ContainedButton style overrides]', () {
     const Color primaryColor = Color(0xff000001);
     const Color onSurfaceColor = Color(0xff000002);
     const Color shadowColor = Color(0xff000004);
@@ -60,7 +60,7 @@ void main() {
     const Duration animationDuration = Duration(milliseconds: 25);
     const bool enableFeedback = false;
 
-    final ButtonStyle style = ElevatedButton.styleFrom(
+    final ButtonStyle style = ContainedButton.styleFrom(
       primary: primaryColor,
       onPrimary: onPrimaryColor,
       onSurface: onSurfaceColor,
@@ -81,7 +81,7 @@ void main() {
     Widget buildFrame({ ButtonStyle buttonStyle, ButtonStyle themeStyle, ButtonStyle overallStyle }) {
       final Widget child = Builder(
         builder: (BuildContext context) {
-          return ElevatedButton(
+          return ContainedButton(
             style: buttonStyle,
             onPressed: () { },
             child: const Text('button'),
@@ -90,14 +90,14 @@ void main() {
       );
       return MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
-          elevatedButtonTheme: ElevatedButtonThemeData(style: overallStyle),
+          containedButtonTheme: ContainedButtonThemeData(style: overallStyle),
         ),
         home: Scaffold(
           body: Center(
-            // If the ElevatedButtonTheme widget is present, it's used
-            // instead of the Theme's ThemeData.ElevatedButtonTheme.
-            child: themeStyle == null ? child : ElevatedButtonTheme(
-              data: ElevatedButtonThemeData(style: themeStyle),
+            // If the ContainedButtonTheme widget is present, it's used
+            // instead of the Theme's ThemeData.containedButtonTheme.
+            child: themeStyle == null ? child : ContainedButtonTheme(
+              data: ContainedButtonThemeData(style: themeStyle),
               child: child,
             ),
           ),
@@ -106,12 +106,12 @@ void main() {
     }
 
     final Finder findMaterial = find.descendant(
-      of: find.byType(ElevatedButton),
+      of: find.byType(ContainedButton),
       matching: find.byType(Material),
     );
 
     final Finder findInkWell = find.descendant(
-      of: find.byType(ElevatedButton),
+      of: find.byType(ContainedButton),
       matching: find.byType(InkWell),
     );
 
@@ -138,7 +138,7 @@ void main() {
       expect(material.borderRadius, null);
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
-      expect(tester.getSize(find.byType(ElevatedButton)), const Size(200, 200));
+      expect(tester.getSize(find.byType(ContainedButton)), const Size(200, 200));
     }
 
     testWidgets('Button style overrides defaults', (WidgetTester tester) async {
@@ -178,75 +178,5 @@ void main() {
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
-  });
-
-  testWidgets('Theme shadowColor', (WidgetTester tester) async {
-    const ColorScheme colorScheme = ColorScheme.light();
-    const Color shadowColor = Color(0xff000001);
-    const Color overiddenColor = Color(0xff000002);
-
-    Widget buildFrame({ Color overallShadowColor, Color themeShadowColor, Color shadowColor }) {
-      return MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme).copyWith(
-          shadowColor: overallShadowColor,
-        ),
-        home: Scaffold(
-          body: Center(
-            child: ElevatedButtonTheme(
-              data: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  shadowColor: themeShadowColor,
-                ),
-              ),
-              child: Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shadowColor: shadowColor,
-                    ),
-                    onPressed: () { },
-                    child: const Text('button'),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final Finder buttonMaterialFinder = find.descendant(
-      of: find.byType(ElevatedButton),
-      matching: find.byType(Material),
-    );
-
-    await tester.pumpWidget(buildFrame());
-    Material material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, Colors.black); //default
-
-    await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
-    await tester.pumpAndSettle(); // theme animation
-    material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, shadowColor);
-
-    await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
-    await tester.pumpAndSettle(); // theme animation
-    material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, shadowColor);
-
-    await tester.pumpWidget(buildFrame(shadowColor: shadowColor));
-    await tester.pumpAndSettle(); // theme animation
-    material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, shadowColor);
-
-    await tester.pumpWidget(buildFrame(overallShadowColor: overiddenColor, themeShadowColor: shadowColor));
-    await tester.pumpAndSettle(); // theme animation
-    material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, shadowColor);
-
-    await tester.pumpWidget(buildFrame(themeShadowColor: overiddenColor, shadowColor: shadowColor));
-    await tester.pumpAndSettle(); // theme animation
-    material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, shadowColor);
   });
 }

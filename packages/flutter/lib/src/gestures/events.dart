@@ -197,8 +197,6 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 /// See also:
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
-///  * [Listener], a widget that calls callbacks in response to common pointer
-///    events.
 @immutable
 abstract class PointerEvent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -728,8 +726,6 @@ class PointerRemovedEvent extends PointerEvent {
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerHover], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerHoverEvent extends PointerEvent {
   /// Creates a pointer hover event.
   ///
@@ -838,8 +834,6 @@ class PointerHoverEvent extends PointerEvent {
 ///  * [PointerExitEvent], which reports when the pointer has left an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerEnter], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerEnterEvent extends PointerEvent {
   /// Creates a pointer enter event.
   ///
@@ -989,8 +983,6 @@ class PointerEnterEvent extends PointerEvent {
 ///  * [PointerEnterEvent], which reports when the pointer has entered an object.
 ///  * [PointerMoveEvent], which reports movement while the pointer is in
 ///    contact with the device.
-///  * [Listener.onPointerExit], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerExitEvent extends PointerEvent {
   /// Creates a pointer exit event.
   ///
@@ -1131,11 +1123,6 @@ class PointerExitEvent extends PointerEvent {
 }
 
 /// The pointer has made contact with the device.
-///
-/// See also:
-///
-///  * [Listener.onPointerDown], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerDownEvent extends PointerEvent {
   /// Creates a pointer down event.
   ///
@@ -1229,8 +1216,6 @@ class PointerDownEvent extends PointerEvent {
 ///
 ///  * [PointerHoverEvent], which reports movement while the pointer is not in
 ///    contact with the device.
-///  * [Listener.onPointerMove], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerMoveEvent extends PointerEvent {
   /// Creates a pointer move event.
   ///
@@ -1337,11 +1322,6 @@ class PointerMoveEvent extends PointerEvent {
 }
 
 /// The pointer has stopped making contact with the device.
-///
-/// See also:
-///
-///  * [Listener.onPointerUp], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerUpEvent extends PointerEvent {
   /// Creates a pointer up event.
   ///
@@ -1437,11 +1417,6 @@ class PointerUpEvent extends PointerEvent {
 /// Pointer signals are events that originate from the pointer but don't change
 /// the state of the pointer itself, and are discrete rather than needing to be
 /// interpreted in the context of a series of events.
-///
-/// See also:
-///
-///  * [Listener.onPointerSignal], which allows callers to be notified of these
-///    events in a widget tree.
 abstract class PointerSignalEvent extends PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1472,11 +1447,6 @@ abstract class PointerSignalEvent extends PointerEvent {
 ///
 /// Scrolling the scroll wheel on a mouse is an example of an event that
 /// would create a [PointerScrollEvent].
-///
-/// See also:
-///
-///  * [Listener.onPointerSignal], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerScrollEvent extends PointerSignalEvent {
   /// Creates a pointer scroll event.
   ///
@@ -1536,11 +1506,6 @@ class PointerScrollEvent extends PointerSignalEvent {
 }
 
 /// The input from the pointer is no longer directed towards this receiver.
-///
-/// See also:
-///
-///  * [Listener.onPointerCancel], which allows callers to be notified of these
-///    events in a widget tree.
 class PointerCancelEvent extends PointerEvent {
   /// Creates a pointer cancel event.
   ///

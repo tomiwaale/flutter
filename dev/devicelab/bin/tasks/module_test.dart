@@ -14,6 +14,8 @@ final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 
+final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
+
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 Future<void> main() async {
@@ -175,7 +177,7 @@ Future<void> main() async {
             flutterDirectory.path,
             'dev',
             'integration_tests',
-            'android_host_app_v2_embedding',
+            useAndroidEmbeddingV2 ? 'android_host_app_v2_embedding' : 'android_host_app',
           ),
         ),
         hostApp,

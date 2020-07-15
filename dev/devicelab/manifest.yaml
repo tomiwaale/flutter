@@ -30,10 +30,6 @@
 #       on should be hidden because they just cause confusion otherwise.
 # * timeout_in_minutes: integer
 #       a custom task timeout, specified in minutes.
-# * on_luci: boolean true or false
-#       whether the task runs on LUCI builders. Tests will be gradually marked on_luci during the
-#       devicelab to LUCI migration. And when the migration is complete, on_luci flag will be
-#       removed.
 
 tasks:
   # Tests of compiling in a variety of modes
@@ -100,7 +96,6 @@ tasks:
       Gallery for iOS from Mac.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    on_luci: true
 
   flutter_gallery_win__compile:
     description: >
@@ -229,7 +224,6 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    on_luci: true
 
   channels_integration_test:
     description: >
@@ -346,6 +340,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  run_machine_concurrent_hot_reload:
+    description: >
+      Runs tests of concurrent hot reload commands via flutter run --machine.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   service_extensions_test:
     description: >
       Validates our service protocol extensions.
@@ -369,7 +369,6 @@ tasks:
       Builds an APK with a --dart-define and verifies it can be used as a constant
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    on_luci: true
 
   android_obfuscate_test:
     description: >

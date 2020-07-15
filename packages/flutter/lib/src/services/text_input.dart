@@ -1000,11 +1000,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
-/// An low-level interface to the system's text input control.
-///
-/// See also:
-///
-///  * [TextField], a widget in which the user may enter text.
+/// An interface to the system's text input control.
 class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;

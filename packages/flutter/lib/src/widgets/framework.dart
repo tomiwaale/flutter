@@ -3179,8 +3179,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This method is the core of the widgets system. It is called each time we
   /// are to add, update, or remove a child based on an updated configuration.
   ///
-  /// The `newSlot` argument specifies the new value for this element's [slot].
-  ///
   /// If the `child` is null, and the `newWidget` is not null, then we have a new
   /// child for which we need to create an [Element], configured with `newWidget`.
   ///
@@ -3282,10 +3280,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// This method transitions the element from the "initial" lifecycle state to
   /// the "active" lifecycle state.
-  ///
-  /// Subclasses that override this method are likely to want to also override
-  /// [update], [visitChildren], [insertChildRenderObject], [moveChildRenderObject],
-  /// and [removeChildRenderObject].
   @mustCallSuper
   void mount(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.initial);
@@ -3315,7 +3309,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _debugRemoveGlobalKeyReservation(Element child) {
     GlobalKey._debugRemoveReservationFor(this, child);
   }
-
   /// Change the widget used to configure this element.
   ///
   /// The framework calls this function when the parent wishes to use a
@@ -3387,7 +3380,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Remove [renderObject] from the render tree.
   ///
   /// The default implementation of this function simply calls
-  /// [detachRenderObject] recursively on each child. The
+  /// [detachRenderObject] recursively on its child. The
   /// [RenderObjectElement.detachRenderObject] override does the actual work of
   /// removing [renderObject] from the render tree.
   ///
@@ -3399,14 +3392,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _slot = null;
   }
 
-  /// Add [renderObject] to the render tree at the location specified by `newSlot`.
+  /// Add [renderObject] to the render tree at the location specified by [slot].
   ///
   /// The default implementation of this function simply calls
-  /// [attachRenderObject] recursively on each child. The
+  /// [attachRenderObject] recursively on its child. The
   /// [RenderObjectElement.attachRenderObject] override does the actual work of
   /// adding [renderObject] to the render tree.
-  ///
-  /// The `newSlot` argument specifies the new value for this element's [slot].
   void attachRenderObject(dynamic newSlot) {
     assert(_slot == null);
     visitChildren((Element child) {
@@ -3470,8 +3461,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// has a widget with that global key, this function will reuse that element
   /// (potentially grafting it from another location in the tree or reactivating
   /// it from the list of inactive elements) rather than creating a new element.
-  ///
-  /// The `newSlot` argument specifies the new value for this element's [slot].
   ///
   /// The element returned by this function will already have been mounted and
   /// will be in the "active" lifecycle state.

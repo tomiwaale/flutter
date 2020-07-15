@@ -6,22 +6,22 @@ package io.flutter.integration.platformviews;
 
 import android.content.Context;
 
-import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class SimpleViewFactory extends PlatformViewFactory {
-    final DartExecutor executor;
+    final BinaryMessenger messenger;
 
-    public SimpleViewFactory(DartExecutor executor) {
+    public SimpleViewFactory(BinaryMessenger messenger) {
         super(null);
-        this.executor = executor;
+        this.messenger = messenger;
     }
 
     @Override
     public PlatformView create(Context context, int id, Object params) {
-        MethodChannel methodChannel = new MethodChannel(executor, "simple_view/" + id);
+        MethodChannel methodChannel = new MethodChannel(messenger, "simple_view/" + id);
         return new SimplePlatformView(context, methodChannel);
     }
 }

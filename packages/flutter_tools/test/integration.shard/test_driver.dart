@@ -554,9 +554,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     return prematureExitGuard.future;
   }
 
-  Future<void> hotRestart({ bool pause = false, bool debounce = false}) => _restart(fullRestart: true, pause: pause);
-  Future<void> hotReload({ bool debounce = false, int debounceDurationOverrideMs }) =>
-      _restart(fullRestart: false, debounce: debounce, debounceDurationOverrideMs: debounceDurationOverrideMs);
+  Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
+  Future<void> hotReload() => _restart(fullRestart: false);
 
   Future<void> scheduleFrame() async {
     if (_currentRunningAppId == null) {
@@ -581,7 +580,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
   }
 
-  Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int debounceDurationOverrideMs }) async {
+  Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
     if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
     }
@@ -589,7 +588,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
     final dynamic hotReloadResponse = await _sendRequest(
       'app.restart',
-      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause, 'debounce': debounce, 'debounceDurationOverrideMs': debounceDurationOverrideMs},
+      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
     );
     _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
@@ -806,21 +805,4 @@ class SourcePosition {
 
   final int line;
   final int column;
-}
-
-Future<Isolate> waitForExtension(VmService vmService) async {
-  final Completer<void> completer = Completer<void>();
-  await vmService.streamListen(EventStreams.kExtension);
-  vmService.onExtensionEvent.listen((Event event) {
-    if (event.json['extensionKind'] == 'Flutter.FrameworkInitialization') {
-      completer.complete();
-    }
-  });
-  final IsolateRef isolateRef = (await vmService.getVM()).isolates.first;
-  final Isolate isolate = await vmService.getIsolate(isolateRef.id);
-  if (isolate.extensionRPCs.contains('ext.flutter.brightnessOverride')) {
-    return isolate;
-  }
-  await completer.future;
-  return isolate;
 }

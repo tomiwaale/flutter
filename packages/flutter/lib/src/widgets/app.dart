@@ -854,6 +854,7 @@ class WidgetsApp extends StatefulWidget {
 
     // Dismissal
     LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+    LogicalKeySet(LogicalKeyboardKey.gameButtonB): const ActivateIntent(),
 
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),

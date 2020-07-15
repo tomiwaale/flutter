@@ -261,15 +261,13 @@ class XcodeProjectInterpreter {
       return;
     }
     try {
-      if (_versionText == null) {
-        final RunResult result = _processUtils.runSync(
-          <String>[_executable, '-version'],
-        );
-        if (result.exitCode != 0) {
-          return;
-        }
-        _versionText = result.stdout.trim().replaceAll('\n', ', ');
+      final RunResult result = _processUtils.runSync(
+        <String>[_executable, '-version'],
+      );
+      if (result.exitCode != 0) {
+        return;
       }
+      _versionText = result.stdout.trim().replaceAll('\n', ', ');
       final Match match = _versionRegex.firstMatch(versionText);
       if (match == null) {
         return;
@@ -277,8 +275,7 @@ class XcodeProjectInterpreter {
       final String version = match.group(1);
       final List<String> components = version.split('.');
       _majorVersion = int.parse(components[0]);
-      _minorVersion = components.length < 2 ? 0 : int.parse(components[1]);
-      _patchVersion = components.length < 3 ? 0 : int.parse(components[2]);
+      _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
     } on ProcessException {
       // Ignored, leave values null.
     }
@@ -308,14 +305,6 @@ class XcodeProjectInterpreter {
       _updateVersion();
     }
     return _minorVersion;
-  }
-
-  int _patchVersion;
-  int get patchVersion {
-    if (_patchVersion == null) {
-      _updateVersion();
-    }
-    return _patchVersion;
   }
 
   /// Asynchronously retrieve xcode build settings. This one is preferred for

@@ -229,9 +229,9 @@ class TimelineSummary {
       .toList();
   }
 
-  List<TimelineEvent> _extractEventsWithNames(Set<String> names) {
+  List<TimelineEvent> _extractCategorizedEvents(String category) {
     return _timeline.events
-      .where((TimelineEvent event) => names.contains(event.name))
+      .where((TimelineEvent event) => event.category == category)
       .toList();
   }
 
@@ -319,7 +319,7 @@ class TimelineSummary {
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents(kRasterizeFrameEventName);
 
-  ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractEventsWithNames(kProfilingEvents));
+  ProfilingSummarizer _profilingSummarizer() => ProfilingSummarizer.fromEvents(_extractCategorizedEvents(kProfilingCategory));
 
   List<Duration> _extractFrameDurations() => _extractBeginEndEvents(kBuildFrameEventName);
 }

@@ -294,13 +294,7 @@ class UpgradeCommandRunner {
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
       globals.printStatus('');
-      await pub.get(
-        context: PubContext.pubUpgrade,
-        directory: projectRoot,
-        upgrade: true,
-        checkLastModified: false,
-        generateSyntheticPackage: false,
-      );
+      await pub.get(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
     }
   }
 

@@ -82,8 +82,9 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///     child: Center(
 ///       child: Shortcuts(
 ///         shortcuts: <LogicalKeySet, Intent>{
-///           // Pressing space in the field will now move to the next field.
-///           LogicalKeySet(LogicalKeyboardKey.space): const NextFocusIntent(),
+///           // Pressing enter on the field will now move to the next field.
+///           LogicalKeySet(LogicalKeyboardKey.enter):
+///               NextFocusIntent(),
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(
@@ -96,7 +97,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///                 return Padding(
 ///                   padding: const EdgeInsets.all(8.0),
 ///                   child: ConstrainedBox(
-///                     constraints: BoxConstraints.tight(const Size(200, 50)),
+///                     constraints: BoxConstraints.tight(Size(200, 50)),
 ///                     child: TextFormField(
 ///                       onSaved: (String value) {
 ///                         print('Value for field $index saved as "$value"');

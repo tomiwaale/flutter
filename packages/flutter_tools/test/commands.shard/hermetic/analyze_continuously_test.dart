@@ -77,11 +77,7 @@ void main() {
         botDetector: globals.botDetector,
         usage: globals.flutterUsage,
       );
-      await pub.get(
-        context: PubContext.flutterTests,
-        directory: tempDir.path,
-        generateSyntheticPackage: false,
-      );
+      await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(
         globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
@@ -115,13 +111,8 @@ void main() {
       platform: const LocalPlatform(),
       usage: globals.flutterUsage,
       botDetector: globals.botDetector,
-      toolStampFile: globals.fs.file('test'),
     );
-    await pub.get(
-      context: PubContext.flutterTests,
-      directory: tempDir.path,
-      generateSyntheticPackage: false,
-    );
+    await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(
         globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),

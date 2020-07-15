@@ -15,6 +15,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
 /// An environment variable used to override the location of Google Chrome.
 const String kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -104,14 +105,14 @@ class ChromiumLauncher {
     @required Platform platform,
     @required ProcessManager processManager,
     @required OperatingSystemUtils operatingSystemUtils,
-    @required BrowserFinder browserFinder,
     @required Logger logger,
+    @required BrowserFinder browserFinder,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
-       _browserFinder = browserFinder,
        _logger = logger,
+       _browserFinder = browserFinder,
        _fileSystemUtils = FileSystemUtils(
          fileSystem: fileSystem,
          platform: platform,
@@ -121,9 +122,9 @@ class ChromiumLauncher {
   final Platform _platform;
   final ProcessManager _processManager;
   final OperatingSystemUtils _operatingSystemUtils;
+  Logger _logger;
   final BrowserFinder _browserFinder;
   final FileSystemUtils _fileSystemUtils;
-  final Logger _logger;
 
   bool get hasChromeInstance => _currentCompleter.isCompleted;
 
@@ -162,6 +163,7 @@ class ChromiumLauncher {
     bool skipCheck = false,
     Directory cacheDir,
   }) async {
+    _logger ??= globals.logger;
     if (_currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
     }
@@ -205,6 +207,13 @@ class ChromiumLauncher {
 
     final Process process = await _processManager.start(args);
 
+    // When the process exits, copy the user settings back to the provided data-dir.
+    if (cacheDir != null) {
+      unawaited(process.exitCode.whenComplete(() {
+        _cacheUserSessionInformation(userDataDir, cacheDir);
+      }));
+    }
+
     process.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -212,8 +221,7 @@ class ChromiumLauncher {
         _logger.printTrace('[CHROME]: $line');
       });
 
-    // Wait until the DevTools are listening before trying to connect. This is
-    // only required for flutter_test --platform=chrome and not flutter run.
+    // Wait until the DevTools are listening before trying to connect.
     await process.stderr
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -224,18 +232,13 @@ class ChromiumLauncher {
       .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
         return 'Failed to spawn stderr';
       });
-
-    // When the process exits, copy the user settings back to the provided data-dir.
-    if (cacheDir != null) {
-      unawaited(process.exitCode.whenComplete(() {
-        _cacheUserSessionInformation(userDataDir, cacheDir);
-      }));
-    }
+    final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
     return _connect(Chromium._(
       port,
       ChromeConnection('localhost', port),
       url: url,
       process: process,
+      remoteDebuggerUri: remoteDebuggerUri,
       chromiumLauncher: this,
     ), skipCheck);
   }
@@ -308,6 +311,28 @@ class ChromiumLauncher {
   }
 
   Future<Chromium> get connectedInstance => _currentCompleter.future;
+
+  /// Returns the full URL of the Chrome remote debugger for the main page.
+  ///
+  /// This takes the [base] remote debugger URL (which points to a browser-wide
+  /// page) and uses its JSON API to find the resolved URL for debugging the host
+  /// page.
+  Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
+    try {
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
+      final HttpClientResponse response = await request.close();
+      final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>;
+      if (jsonObject == null || jsonObject.isEmpty) {
+        return base;
+      }
+      return base.resolve(jsonObject.first['devtoolsFrontendUrl'] as String);
+    } on Exception {
+      // If we fail to talk to the remote debugger protocol, give up and return
+      // the raw URL rather than crashing.
+      return base;
+    }
+  }
 }
 
 /// A class for managing an instance of a Chromium browser.
@@ -317,6 +342,7 @@ class Chromium {
     this.chromeConnection, {
     this.url,
     Process process,
+    this.remoteDebuggerUri,
     @required ChromiumLauncher chromiumLauncher,
   })  : _process = process,
         _chromiumLauncher = chromiumLauncher;
@@ -325,6 +351,7 @@ class Chromium {
   final int debugPort;
   final Process _process;
   final ChromeConnection chromeConnection;
+  final Uri remoteDebuggerUri;
   final ChromiumLauncher _chromiumLauncher;
 
   Future<int> get onExit => _process.exitCode;

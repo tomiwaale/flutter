@@ -157,7 +157,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
         expect(xcode.isVersionSatisfactory, isFalse);
       });
@@ -172,7 +171,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
         expect(xcode.isVersionSatisfactory, isTrue);
       });
@@ -181,7 +179,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
         expect(xcode.isVersionSatisfactory, isTrue);
       });
@@ -190,16 +187,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
-
-        expect(xcode.isVersionSatisfactory, isTrue);
-      });
-
-      testWithoutContext('xcodeVersionSatisfactory is true when patch version exceeds minimum', () {
-        when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-        when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-        when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(1);
 
         expect(xcode.isVersionSatisfactory, isTrue);
       });
@@ -232,7 +219,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
         expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -247,7 +233,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
         expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);
@@ -262,7 +247,6 @@ void main() {
         when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
         when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
         when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-        when(mockXcodeProjectInterpreter.patchVersion).thenReturn(0);
 
         expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
         expect(fakeProcessManager.hasRemainingExpectations, isFalse);

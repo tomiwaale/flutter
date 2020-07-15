@@ -112,10 +112,8 @@ void main() {
     await gesture.moveTo(const Offset(400.0, 300.0));
     expect(move, isNotNull);
     expect(move.position, equals(const Offset(400.0, 300.0)));
-    expect(move.localPosition, equals(const Offset(50.0, 50.0)));
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
-    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -147,7 +145,6 @@ void main() {
     expect(enter, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(1.0, 1.0)));
-    expect(exit.localPosition, equals(const Offset(-349.0, -249.0)));
   });
 
   testWidgets('triggers pointer enter when a mouse is connected', (WidgetTester tester) async {
@@ -173,7 +170,6 @@ void main() {
     expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
-    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -207,7 +203,6 @@ void main() {
     expect(enter, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(400.0, 300.0)));
-    expect(exit.localPosition, equals(const Offset(50.0, 50.0)));
     exit = null;
     await tester.pump();
     expect(move, isNull);
@@ -248,7 +243,6 @@ void main() {
     expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
-    expect(enter.localPosition, equals(const Offset(50.0, 50.0)));
     expect(exit, isNull);
   });
 
@@ -291,7 +285,7 @@ void main() {
     PointerHoverEvent move;
     PointerExitEvent exit;
     await tester.pumpWidget(Container(
-      alignment: Alignment.topLeft,
+      alignment: Alignment.center,
       child: MouseRegion(
         child: const SizedBox(
           width: 100.0,
@@ -303,14 +297,14 @@ void main() {
       ),
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: const Offset(401.0, 301.0));
+    await gesture.addPointer(location: const Offset(1.0, 1.0));
     addTearDown(gesture.removePointer);
     await tester.pump();
     expect(enter, isNull);
     expect(move, isNull);
     expect(exit, isNull);
     await tester.pumpWidget(Container(
-      alignment: Alignment.center,
+      alignment: Alignment.topLeft,
       child: MouseRegion(
         child: const SizedBox(
           width: 100.0,
@@ -323,8 +317,7 @@ void main() {
     ));
     await tester.pump();
     expect(enter, isNotNull);
-    expect(enter.position, equals(const Offset(401.0, 301.0)));
-    expect(enter.localPosition, equals(const Offset(51.0, 51.0)));
+    expect(enter.position, equals(const Offset(1.0, 1.0)));
     expect(move, isNull);
     expect(exit, isNull);
   });
@@ -369,7 +362,6 @@ void main() {
     expect(move, isNull);
     expect(exit, isNotNull);
     expect(exit.position, equals(const Offset(400, 300)));
-    expect(exit.localPosition, equals(const Offset(50, 50)));
   });
 
   testWidgets('Hover works with nested listeners', (WidgetTester tester) async {

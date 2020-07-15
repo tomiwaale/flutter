@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart=2.9
-
-void methodThatAcceptsNonNull(int x) {
-  print(x + 2);
-}
+include ':app'
+setBinding(new Binding([gradle: this]))
+evaluate(new File(settingsDir.parentFile, 'hello/.android/include_flutter.groovy'))

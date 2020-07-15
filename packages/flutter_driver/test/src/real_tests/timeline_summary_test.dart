@@ -65,7 +65,7 @@ void main() {
     };
 
     Map<String, dynamic> cpuUsage(int timeStamp, double cpuUsage) => <String, dynamic>{
-      'cat': 'embedder',
+      'cat': 'flutter::profiling',
       'name': 'CpuUsage',
       'ts': timeStamp,
       'args': <String, String>{
@@ -74,7 +74,7 @@ void main() {
     };
 
     Map<String, dynamic> memoryUsage(int timeStamp, double dirty, double shared) => <String, dynamic>{
-      'cat': 'embedder',
+      'cat': 'flutter::profiling',
       'name': 'MemoryUsage',
       'ts': timeStamp,
       'args': <String, String>{

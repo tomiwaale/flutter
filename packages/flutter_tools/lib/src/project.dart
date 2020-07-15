@@ -805,7 +805,7 @@ class AndroidProject extends FlutterProjectPlatform {
     await _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
-      'library_new_embedding',
+      featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
@@ -820,6 +820,7 @@ class AndroidProject extends FlutterProjectPlatform {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
+        'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,

@@ -1799,10 +1799,10 @@ class _DialogRoute<T> extends PopupRoute<T> {
 Future<T> showGeneralDialog<T>({
   @required BuildContext context,
   @required RoutePageBuilder pageBuilder,
-  bool barrierDismissible = false,
+  bool barrierDismissible,
   String barrierLabel,
-  Color barrierColor = const Color(0x80000000),
-  Duration transitionDuration = const Duration(milliseconds: 200),
+  Color barrierColor,
+  Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
   bool useRootNavigator = true,
   RouteSettings routeSettings,
